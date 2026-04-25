@@ -27,7 +27,7 @@ Terraform project that provisions:
 
 ## Prerequisites
 
-- Terraform `>= 1.5`
+- Terraform `>= 1.6` (for `terraform test` in CI)
 - AWS credentials (CLI profile, env vars, etc.) with permission to create EC2, VPC read, key pairs, and security groups.
 
 ## Quick start
@@ -56,7 +56,9 @@ terraform apply
 
 ## GitHub Actions
 
-Same pattern as **AWS_IAM_learning**: workflow [`.github/workflows/terraform.yml`](.github/workflows/terraform.yml) runs **fmt / validate** always, **plan** and **apply** when secret **`AWS_ROLE_ARN`** is set (OIDC, no access keys in GitHub).
+Same pattern as **AWS_IAM_learning**: workflow [`.github/workflows/terraform.yml`](.github/workflows/terraform.yml) runs **fmt / validate** always, then with OIDC **`terraform test` → `terraform plan`**, and **apply** when **`AWS_ROLE_ARN`** is set. This mirrors the **Terraform Test + plan** stages from the AWS workshop, but on **GitHub Actions** instead of CodeBuild. **Checkov** and **S3 backend** are optional follow-ups.
+
+Local: `terraform test` (see `tests/smoke.tftest.hcl`). Requires **Terraform ≥ 1.6** and AWS credentials.
 
 1. **GitHub OIDC provider** must already exist in the account (one per account for `token.actions.githubusercontent.com`). If you used **AWS_IAM_learning**, it is already there.
 2. Apply this repo locally so Terraform creates role **`github-actions-ec2`** (see `github_actions_ci.tf`) trusted for **`repo:lukehiura/AWS_EC2_learning:*`** (override `github_actions_repository` if your fork/name differs).
