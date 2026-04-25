@@ -55,6 +55,40 @@ variable "key_name" {
   default     = "learning-ec2-key"
 }
 
+variable "create_ec2_cpu_utilization_alarm" {
+  description = "Create a CloudWatch alarm on AWS/EC2 CPUUtilization (Average) for aws_instance.this."
+  type        = bool
+  default     = true
+}
+
+variable "cloudwatch_cpu_threshold_percent" {
+  description = "Static threshold (percent): alarm when Average CPUUtilization is greater than or equal to this value (1–100)."
+  type        = number
+  default     = 15
+
+  validation {
+    condition     = var.cloudwatch_cpu_threshold_percent > 0 && var.cloudwatch_cpu_threshold_percent <= 100
+    error_message = "Threshold must be between 1 and 100 percent."
+  }
+}
+
+variable "cloudwatch_cpu_period_seconds" {
+  description = "CloudWatch period in seconds for the CPU metric (e.g. 60 or 300). Must align with EC2 monitoring granularity."
+  type        = number
+  default     = 300
+}
+
+variable "cloudwatch_cpu_evaluation_periods" {
+  description = "Consecutive breaching periods before alarm state becomes ALARM."
+  type        = number
+  default     = 2
+
+  validation {
+    condition     = var.cloudwatch_cpu_evaluation_periods >= 1 && var.cloudwatch_cpu_evaluation_periods <= 10
+    error_message = "Use between 1 and 10 evaluation periods."
+  }
+}
+
 variable "tags" {
   description = "Extra tags merged onto the GitHub CI IAM role (provider default_tags still apply to other resources)."
   type        = map(string)

@@ -1,0 +1,27 @@
+---
+description: Terraform + agent habits + doc lookup — always loaded; keep concise.
+alwaysApply: true
+---
+
+# Engineering standards (this repo)
+
+## Terraform & HCL
+
+- Run **`terraform fmt`** on touched `.tf` / `.hcl`; keep `versions.tf` constraints accurate when changing providers or Terraform features.
+- Prefer **variables** with descriptions and sensible defaults in `variables.tf`; wire through to resources instead of magic literals.
+- Use **`outputs.tf`** for anything operators need (IPs, commands, role ARNs); mark sensitive outputs correctly.
+- **Default tags** live in `providers.tf` — extend there instead of one‑off tag blocks unless a resource truly needs an exception.
+
+## Describe how to build, not product specs
+
+- Rules should encode **patterns** (validation, naming, safety), not one‑off UI/feature wishlists.
+
+## What **not** to do
+
+- Do not add heavy SDKs, random CLIs, or alternate IaC tools **unless** the user explicitly asks.
+- Do not weaken SSH / SG / IAM trust without calling it out as a **conscious, documented** change.
+- Do not reference vague “existing patterns” — point at a real file (e.g. `main.tf` for EC2 wiring, `github_actions_ci.tf` for OIDC trust).
+
+## Documentation freshness (Context7 MCP)
+
+When work touches a **named** framework, library, SDK, **AWS/Terraform provider API**, or CLI whose exact syntax or defaults matter, use the **Context7** MCP: read tool schemas first, **`resolve-library-id`** then **`query-docs`**, unless the user supplied a `/org/project` library id. Prefer Context7 over guessing or stale training data for those lookups. Skip Context7 for pure refactors or generic programming theory with no external API surface.

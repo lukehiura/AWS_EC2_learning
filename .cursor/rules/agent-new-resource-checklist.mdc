@@ -1,0 +1,21 @@
+---
+description: Pull when adding or substantially changing AWS resources, CI stages, new variables/outputs, or user-facing workflow behavior end-to-end.
+alwaysApply: false
+---
+
+# New resource / feature checklist (agent‑requested)
+
+## Before finishing
+
+1. **Variables**: `variables.tf` + `terraform.tfvars.example` updated; descriptions accurate.
+2. **Outputs**: Anything operators need in `outputs.tf`; sensitive where appropriate.
+3. **README**: Prerequisites, security notes, or layout table updated if behavior changed.
+4. **Tests**: `tests/smoke.tftest.hcl` or new `*.tftest.hcl` if behavior should be guarded; workflow **paths** updated if new locations.
+5. **CI**: If IAM permissions change, `github_actions_ci.tf` and workflow still least‑privilege.
+6. **Tags / providers**: Default tags in `providers.tf` still make sense.
+7. **Context7**: If a new AWS service or Terraform resource type needs exact argument names, use Context7 for provider docs.
+
+## Do not
+
+- Do not leave “apply later” placeholders in production‑ish paths without a TODO or README note.
+- Do not add resources with no way to destroy or with surprise billing (call out cost for non–free‑tier types).

@@ -1,0 +1,15 @@
+---
+description: S3 buckets, objects, and public access for koala / static examples.
+globs: "**/s3*.tf"
+alwaysApply: false
+---
+
+# Zone: S3 (`s3_*.tf`)
+
+- Treat **bucket policies, public ACLs, and `public_access_block`** as security‑critical — align with whatever pattern `s3_koalas.tf` already encodes; do not open read/write to `Principal: "*"` without an explicit user request and warning.
+- Prefer **encryption** and **blocking public access** defaults unless the exercise requires a public object URL (then document the risk in README or comments).
+
+## Do not
+
+- Do not commit large binary assets to git unless the user wants them versioned; prefer references or fetch patterns they choose.
+- Do not introduce a second ad‑hoc S3 module pattern if the root module style in `s3_koalas.tf` is sufficient.

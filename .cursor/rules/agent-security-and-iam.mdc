@@ -1,0 +1,19 @@
+---
+description: Pull when touching SSH exposure, security groups, IAM roles or policies, OIDC trust, Terraform sensitive outputs, credentials, or anything that could leak secrets or widen blast radius.
+alwaysApply: false
+---
+
+# Security & IAM (agent‑requested)
+
+## Checklist
+
+- **SSH**: Prefer tightening `allowed_ssh_cidr`; flag `0.0.0.0/0`. Mention SSM Session Manager as a follow‑up when removing open SSH.
+- **Keys**: Never suggest committing PEMs or printing private keys into logs; state‑stored keys need the same care as README describes.
+- **IAM / OIDC**: Condition keys on `aud` and `sub` (see `github_actions_ci.tf`); avoid `StringLike` on `sub` that matches every repo.
+- **S3**: Re‑read public access, bucket policy principals, and encryption before approving changes.
+- **Outputs**: Mark sensitive; avoid new outputs that exfiltrate env or tokens.
+
+## Do not
+
+- Do not “temporarily” use admin‑istrator access policies for CI.
+- Do not pipe secrets into `local-exec` without explicit user approval.

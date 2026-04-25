@@ -1,0 +1,31 @@
+---
+description: Core project facts — always loaded; keep this file small.
+alwaysApply: true
+---
+
+# AWS_EC2_learning — project context
+
+Terraform learning repo: **EC2 (Amazon Linux 2023) + SSH key pair + security group** in the **default VPC**, optional **S3** sample (`s3_koalas.tf`), and **GitHub Actions OIDC** for CI (`github_actions_ci.tf`, `.github/workflows/terraform.yml`).
+
+## Where things live (read these before changing behavior)
+
+| Area | Files |
+|------|--------|
+| Instance, AMI, key, SG | `main.tf` |
+| Inputs / defaults | `variables.tf`, `terraform.tfvars.example` |
+| Outputs | `outputs.tf` |
+| Provider + tags | `providers.tf` |
+| Versions | `versions.tf` |
+| CI IAM (OIDC) | `github_actions_ci.tf` |
+| Workflow | `.github/workflows/terraform.yml` |
+| Terraform tests | `tests/smoke.tftest.hcl` |
+
+## Non‑negotiables
+
+- **Never** commit Terraform state, `.pem` / private keys, real `terraform.tfvars`, or long‑lived secrets. README already warns about `private_key_pem` in state.
+- Treat **`allowed_ssh_cidr`** as security‑sensitive (default open CIDR is for learning only).
+- **Free tier / sizing** claims in README must stay honest — offers vary; do not hard‑code promises that contradict AWS docs.
+
+## What not to build here
+
+- Do not turn this into a generic app scaffold (no Express/React/Supabase layers). Stay AWS + Terraform + CI aligned with the README.

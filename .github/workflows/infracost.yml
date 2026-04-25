@@ -1,0 +1,60 @@
+name: Infracost
+
+# Parses Terraform HCL only — no AWS credentials. Estimates are list-price style;
+# use AWS Billing / Cost Explorer for actual spend.
+
+on:
+  pull_request:
+    paths:
+      - "**.tf"
+      - ".terraform.lock.hcl"
+      - ".github/workflows/infracost.yml"
+  push:
+    branches: [main]
+    paths:
+      - "**.tf"
+      - ".terraform.lock.hcl"
+      - ".github/workflows/infracost.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: infracost-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Check Infracost API key
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - name: Detect INFRACOST_API_KEY
+        id: check
+        env:
+          INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}
+        run: |
+          if [ -n "${INFRACOST_API_KEY}" ]; then
+            echo "run=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "run=false" >> "${GITHUB_OUTPUT}"
+            echo "::notice title=Infracost::Skipping Infracost: add repository secret INFRACOST_API_KEY (free key from https://dashboard.infracost.io)."
+          fi
+
+  breakdown:
+    name: Cost breakdown
+    runs-on: ubuntu-latest
+    needs: [gate]
+    if: needs.gate.outputs.run == 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v3
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      - name: Infracost breakdown
+        run: infracost breakdown --path . --format table >> "${GITHUB_STEP_SUMMARY}"

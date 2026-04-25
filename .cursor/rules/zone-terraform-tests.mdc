@@ -1,0 +1,16 @@
+---
+description: Terraform 1.6+ tests and smoke test HCL.
+globs: "**/*.tftest.hcl"
+alwaysApply: false
+---
+
+# Zone: `terraform test`
+
+- **`tests/smoke.tftest.hcl`** is the reference layout — mirror its structure for new tests.
+- Tests need **Terraform ≥ 1.6** and credentials where the README says so; do not assert live values that break in CI without mocks or `command` patterns the project already uses.
+- Prefer **assertions** that match what CI runs (fmt/validate/plan expectations).
+
+## Do not
+
+- Do not add tests that require **apply** to shared production accounts unless the user opts in.
+- Do not skip updating **workflow path filters** in `.github/workflows/terraform.yml` when adding new test files outside existing globs.

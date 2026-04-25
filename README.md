@@ -30,6 +30,20 @@ Terraform project that provisions:
 - Terraform `>= 1.6` (for `terraform test` in CI)
 - AWS credentials (CLI profile, env vars, etc.) with permission to create EC2, VPC read, key pairs, and security groups.
 
+## Cost estimates (Infracost)
+
+Infracost gives a **rough monthly estimate** from your Terraform (list-style prices). It does **not** reflect Free Tier, credits, or real usage; use **AWS Billing / Cost Explorer** for actual charges.
+
+1. Install the CLI (e.g. `brew install infracost`).
+2. Run `infracost auth login` once and follow the prompt — you get a **free API key** for the [Cloud Pricing API](https://www.infracost.io/docs/features/cli_commands/).
+3. From this directory:
+
+   ```bash
+   infracost breakdown --path . --format table
+   ```
+
+**GitHub Actions:** add repository secret **`INFRACOST_API_KEY`** (same key as locally). Workflow [`.github/workflows/infracost.yml`](.github/workflows/infracost.yml) runs on pushes/PRs that touch `*.tf`; if the secret is missing, the workflow skips cost breakdown and prints a notice.
+
 ## Quick start
 
 ```bash
@@ -56,7 +70,7 @@ terraform apply
 
 ## GitHub Actions
 
-Same pattern as **AWS_IAM_learning**: workflow [`.github/workflows/terraform.yml`](.github/workflows/terraform.yml) runs **fmt / validate** always, then with OIDC **`terraform test` → `terraform plan`**, and **apply** when **`AWS_ROLE_ARN`** is set. This mirrors the **Terraform Test + plan** stages from the AWS workshop, but on **GitHub Actions** instead of CodeBuild. **Checkov** and **S3 backend** are optional follow-ups.
+Same pattern as **AWS_IAM_learning**: workflow [`.github/workflows/terraform.yml`](.github/workflows/terraform.yml) runs **fmt / validate** always, then with OIDC **`terraform test` → `terraform plan`**, and **apply** when **`AWS_ROLE_ARN`** is set. **Infracost** runs separately when **`INFRACOST_API_KEY`** is set (see [Cost estimates (Infracost)](#cost-estimates-infracost)). This mirrors the **Terraform Test + plan** stages from the AWS workshop, but on **GitHub Actions** instead of CodeBuild. **Checkov** and **S3 backend** are optional follow-ups.
 
 Local: `terraform test` (see `tests/smoke.tftest.hcl`). Requires **Terraform ≥ 1.6** and AWS credentials.
 
@@ -76,3 +90,4 @@ Local: `terraform test` (see `tests/smoke.tftest.hcl`). Requires **Terraform ≥
 | `providers.tf` | AWS provider + default tags |
 | `versions.tf` | Terraform and provider versions |
 | `.github/workflows/terraform.yml` | CI: validate, plan, apply |
+| `.github/workflows/infracost.yml` | CI: optional Terraform cost breakdown (needs `INFRACOST_API_KEY`) |

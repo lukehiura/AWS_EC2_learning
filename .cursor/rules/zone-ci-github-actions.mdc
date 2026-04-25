@@ -1,0 +1,23 @@
+---
+description: GitHub Actions workflows and GitHub OIDC IAM for this repo.
+globs: ".github/**/*.yml"
+alwaysApply: false
+---
+
+# Zone: CI + GitHub OIDC
+
+## Invariants
+
+- Workflow lives at **`.github/workflows/terraform.yml`** — match its **path filters**, **permissions** (`id-token: write` for OIDC), and **concurrency** style when extending jobs.
+- IAM for OIDC lives in **`github_actions_ci.tf`** (also matched when you edit that file via the Terraform zone rule). That file assumes the **account‑level** GitHub OIDC provider already exists (see file header). Do not recreate the provider here; reference it like the existing `data "aws_iam_openid_connect_provider" "github_actions"`.
+- Trust **`sub`** to **`repo:${var.github_actions_repository}:*`** unless the user explicitly changes repository scope.
+
+## When editing the workflow
+
+- Keep **validate → plan → apply** gating consistent with README (apply behind secret / environment as today).
+- Preserve **`working-directory`** and lockfile behavior unless the module layout changes.
+
+## Do not
+
+- Do not broaden IAM permissions for “convenience” without listing least‑privilege alternatives.
+- Do not remove **OIDC** in favor of long‑lived access keys in CI.

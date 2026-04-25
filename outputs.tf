@@ -43,3 +43,13 @@ output "koalas_object_keys" {
   description = "Object keys under the koalas/ prefix."
   value       = sort([for _, o in aws_s3_object.koalas : o.key])
 }
+
+output "cloudwatch_cpu_alarm_name" {
+  description = "CloudWatch alarm name for high CPU (null if create_ec2_cpu_utilization_alarm is false)."
+  value       = try(aws_cloudwatch_metric_alarm.ec2_cpu_high[0].alarm_name, null)
+}
+
+output "cloudwatch_cpu_alarm_arn" {
+  description = "CloudWatch alarm ARN (null if create_ec2_cpu_utilization_alarm is false)."
+  value       = try(aws_cloudwatch_metric_alarm.ec2_cpu_high[0].arn, null)
+}
