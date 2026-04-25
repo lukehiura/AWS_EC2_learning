@@ -17,19 +17,23 @@ variable "instance_name" {
 }
 
 variable "instance_type" {
-  description = "EC2 instance type. Default t2.micro matches the classic 12-month Free Tier Linux offer; use t3.micro if t2 is unavailable in your region (also commonly Free Tier eligible—verify in your account)."
+  description = <<-EOT
+    EC2 instance type. Eligibility depends on account signup date (AWS documents different Free Tier benefits before vs on/after 2025-07-15).
+    Default t3.micro is Free Tier–eligible for many newer accounts; t2.micro may be rejected with InvalidParameterCombination on those accounts.
+    List types marked for your account (set region to match var.aws_region / ~/.aws/config): aws ec2 describe-instance-types --region us-east-1 --filters Name=free-tier-eligible,Values=true --query "InstanceTypes[*].InstanceType" --output text
+  EOT
   type        = string
-  default     = "t2.micro"
+  default     = "t3.micro"
 }
 
 variable "root_volume_size_gb" {
-  description = "Root gp2 volume size (GiB). Free Tier includes up to 30 GiB gp2 combined for new accounts—keep this small unless you need more."
+  description = "Root EBS volume size (GiB). Amazon Linux 2023 x86_64 AMIs in many regions use a root snapshot that requires at least 30 GiB; smaller values cause InvalidBlockDeviceMapping on RunInstances. Free Tier (legacy) often includes gp2/gp3 General Purpose SSD—confirm for your account."
   type        = number
-  default     = 8
+  default     = 30
 
   validation {
-    condition     = var.root_volume_size_gb >= 8 && var.root_volume_size_gb <= 30
-    error_message = "Use between 8 and 30 GiB for a typical Free Tier–friendly root disk."
+    condition     = var.root_volume_size_gb >= 8 && var.root_volume_size_gb <= 100
+    error_message = "Use between 8 and 100 GiB (many AL2023 AMIs need at least 30 GiB)."
   }
 }
 
@@ -49,6 +53,40 @@ variable "key_name" {
   description = "AWS EC2 key pair name (logical name in AWS)."
   type        = string
   default     = "learning-ec2-key"
+}
+
+variable "create_ec2_cpu_utilization_alarm" {
+  description = "Create a CloudWatch alarm on AWS/EC2 CPUUtilization (Average) for aws_instance.this."
+  type        = bool
+  default     = true
+}
+
+variable "cloudwatch_cpu_threshold_percent" {
+  description = "Static threshold (percent): alarm when Average CPUUtilization is greater than or equal to this value (1–100)."
+  type        = number
+  default     = 15
+
+  validation {
+    condition     = var.cloudwatch_cpu_threshold_percent > 0 && var.cloudwatch_cpu_threshold_percent <= 100
+    error_message = "Threshold must be between 1 and 100 percent."
+  }
+}
+
+variable "cloudwatch_cpu_period_seconds" {
+  description = "CloudWatch period in seconds for the CPU metric (e.g. 60 or 300). Must align with EC2 monitoring granularity."
+  type        = number
+  default     = 300
+}
+
+variable "cloudwatch_cpu_evaluation_periods" {
+  description = "Consecutive breaching periods before alarm state becomes ALARM."
+  type        = number
+  default     = 2
+
+  validation {
+    condition     = var.cloudwatch_cpu_evaluation_periods >= 1 && var.cloudwatch_cpu_evaluation_periods <= 10
+    error_message = "Use between 1 and 10 evaluation periods."
+  }
 }
 
 variable "tags" {

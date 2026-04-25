@@ -1,6 +1,6 @@
 # aws_region         = "us-east-1"
-# instance_type      = "t2.micro"   # or t3.micro if t2 unavailable in region
-# root_volume_size_gb = 8
+# instance_type      = "t3.micro"  # default; use t2.micro only if your account lists it as free-tier-eligible
+# root_volume_size_gb = 30   # AL2023 AMIs often require >= 30; adjust if your AMI allows smaller
 # instance_name      = "learning-ec2"
 # key_name           = "learning-ec2-key"
 

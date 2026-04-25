@@ -1,0 +1,24 @@
+---
+description: AWS resources, data sources, and Terraform patterns for root modules.
+globs: "**/*.tf"
+alwaysApply: false
+---
+
+# Zone: Terraform + AWS (all `*.tf`)
+
+## Patterns to follow
+
+- **AMI lookup**: mirror `data "aws_ami" "al2023"` in `main.tf` — explicit filters, `owners`, architecture.
+- **Default VPC wiring**: reuse the `data "aws_vpc" "default"` / `data "aws_subnets" "default"` approach when adding subnets or SGs; do not assume custom VPC IDs unless variables introduce them.
+- **SSH keys**: respect the **generated vs user‑supplied** split controlled by `var.ssh_public_key` and `tls_private_key` count pattern in `main.tf`.
+- **Security groups**: keep ingress rules minimal; document any `0.0.0.0/0` as learning‑only.
+
+## When adding resources
+
+- Add variables first, then resources, then outputs users need.
+- Keep **provider‑version** implications in mind (`versions.tf`).
+
+## Do not
+
+- Do not introduce a second competing pattern for AMI or subnet lookup in the same module without consolidating.
+- Do not store secrets in plain Terraform strings — use variables, CI secrets, or SSM patterns the user chooses.
