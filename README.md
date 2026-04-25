@@ -1,5 +1,7 @@
 # EC2 + SSH key (Terraform)
 
+Defaults target the **AWS Free Tier (12‑month)** style footprint where applicable: **`t2.micro`**, **gp2** root disk **8 GiB** (under the 30 GiB gp2 allocation), single small instance. **Offers differ by account, region, and signup date** — confirm against [AWS Free Tier](https://aws.amazon.com/free/).
+
 Terraform project that provisions:
 
 - One **Amazon Linux 2023** **EC2** instance in the **default VPC** (first default subnet).
@@ -52,12 +54,23 @@ terraform apply
 - Prefer **SSM Session Manager** later instead of open SSH + long-lived PEMs.
 - Add an **S3 backend** (and locking) before treating this as production.
 
+## GitHub Actions
+
+Same pattern as **AWS_IAM_learning**: workflow [`.github/workflows/terraform.yml`](.github/workflows/terraform.yml) runs **fmt / validate** always, **plan** and **apply** when secret **`AWS_ROLE_ARN`** is set (OIDC, no access keys in GitHub).
+
+1. **GitHub OIDC provider** must already exist in the account (one per account for `token.actions.githubusercontent.com`). If you used **AWS_IAM_learning**, it is already there.
+2. Apply this repo locally so Terraform creates role **`github-actions-ec2`** (see `github_actions_ci.tf`) trusted for **`repo:lukehiura/AWS_EC2_learning:*`** (override `github_actions_repository` if your fork/name differs).
+3. In **this** GitHub repo: **Settings → Secrets → Actions** → **`AWS_ROLE_ARN`** = `terraform output -raw github_actions_role_arn` after apply.
+4. Optional: **Variables** → **`AWS_REGION`**; **Environments** → **`terraform-apply`** for gated manual apply.
+
 ## Layout
 
 | File | Purpose |
 |------|---------|
 | `main.tf` | AMI lookup, key pair, security group, instance |
-| `variables.tf` | Region, type, SSH CIDR, optional public key |
-| `outputs.tf` | IP, SSH hint, sensitive private key when generated |
+| `github_actions_ci.tf` | IAM role for GitHub OIDC (reuses account OIDC provider) |
+| `variables.tf` | Region, type, SSH CIDR, optional public key, CI role toggles |
+| `outputs.tf` | IP, SSH hint, sensitive private key when generated, CI role ARN |
 | `providers.tf` | AWS provider + default tags |
 | `versions.tf` | Terraform and provider versions |
+| `.github/workflows/terraform.yml` | CI: validate, plan, apply |

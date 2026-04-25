@@ -23,3 +23,8 @@ output "private_key_pem" {
   value       = try(tls_private_key.ssh[0].private_key_pem, null)
   sensitive   = true
 }
+
+output "github_actions_role_arn" {
+  description = "Set as GitHub secret AWS_ROLE_ARN for this repository's Actions (null if create_github_actions_ci_role is false)."
+  value       = var.create_github_actions_ci_role ? aws_iam_role.github_ci[0].arn : null
+}

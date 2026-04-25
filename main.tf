@@ -79,9 +79,17 @@ resource "aws_instance" "this" {
   vpc_security_group_ids = [aws_security_group.ssh.id]
   subnet_id              = data.aws_subnets.default.ids[0]
 
+  # T3/T3a: standard CPU credits avoids surprise charges from unlimited bursting outside Free Tier.
+  dynamic "credit_specification" {
+    for_each = startswith(var.instance_type, "t3") ? [1] : []
+    content {
+      cpu_credits = "standard"
+    }
+  }
+
   root_block_device {
-    volume_size           = 30
-    volume_type           = "gp3"
+    volume_size           = var.root_volume_size_gb
+    volume_type           = "gp2"
     delete_on_termination = true
   }
 
