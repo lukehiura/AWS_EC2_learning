@@ -1,6 +1,6 @@
 # EC2 + SSH key (Terraform)
 
-Defaults target the **AWS Free Tier (12‑month)** style footprint where applicable: **`t2.micro`**, **gp2** root disk **8 GiB** (under the 30 GiB gp2 allocation), single small instance. **Offers differ by account, region, and signup date** — confirm against [AWS Free Tier](https://aws.amazon.com/free/).
+Defaults target a **small, Free Tier–friendly** footprint where applicable: **`t3.micro`** (many newer accounts are not eligible for **`t2.micro`**; AWS returns `InvalidParameterCombination` if the type is not free-tier eligible), **gp3** root disk **30 GiB** (many **Amazon Linux 2023** AMIs require at least this snapshot size). **Offers differ by account, region, and signup date** — confirm against [AWS Free Tier](https://aws.amazon.com/free/) and [EC2 Free Tier usage](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-free-tier-usage.html).
 
 Terraform project that provisions:
 

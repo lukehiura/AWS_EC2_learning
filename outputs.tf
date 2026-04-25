@@ -28,3 +28,18 @@ output "github_actions_role_arn" {
   description = "Set as GitHub secret AWS_ROLE_ARN for this repository's Actions (null if create_github_actions_ci_role is false)."
   value       = var.create_github_actions_ci_role ? aws_iam_role.github_ci[0].arn : null
 }
+
+output "koalas_bucket_id" {
+  description = "S3 bucket name containing uploaded koalas/ objects."
+  value       = aws_s3_bucket.koalas.id
+}
+
+output "koalas_bucket_arn" {
+  description = "S3 bucket ARN for koala images."
+  value       = aws_s3_bucket.koalas.arn
+}
+
+output "koalas_object_keys" {
+  description = "Object keys under the koalas/ prefix."
+  value       = sort([for _, o in aws_s3_object.koalas : o.key])
+}

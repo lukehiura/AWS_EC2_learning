@@ -17,19 +17,23 @@ variable "instance_name" {
 }
 
 variable "instance_type" {
-  description = "EC2 instance type. Default t2.micro matches the classic 12-month Free Tier Linux offer; use t3.micro if t2 is unavailable in your region (also commonly Free Tier eligible—verify in your account)."
+  description = <<-EOT
+    EC2 instance type. Eligibility depends on account signup date (AWS documents different Free Tier benefits before vs on/after 2025-07-15).
+    Default t3.micro is Free Tier–eligible for many newer accounts; t2.micro may be rejected with InvalidParameterCombination on those accounts.
+    List types marked for your account (set region to match var.aws_region / ~/.aws/config): aws ec2 describe-instance-types --region us-east-1 --filters Name=free-tier-eligible,Values=true --query "InstanceTypes[*].InstanceType" --output text
+  EOT
   type        = string
-  default     = "t2.micro"
+  default     = "t3.micro"
 }
 
 variable "root_volume_size_gb" {
-  description = "Root gp2 volume size (GiB). Free Tier includes up to 30 GiB gp2 combined for new accounts—keep this small unless you need more."
+  description = "Root EBS volume size (GiB). Amazon Linux 2023 x86_64 AMIs in many regions use a root snapshot that requires at least 30 GiB; smaller values cause InvalidBlockDeviceMapping on RunInstances. Free Tier (legacy) often includes gp2/gp3 General Purpose SSD—confirm for your account."
   type        = number
-  default     = 8
+  default     = 30
 
   validation {
-    condition     = var.root_volume_size_gb >= 8 && var.root_volume_size_gb <= 30
-    error_message = "Use between 8 and 30 GiB for a typical Free Tier–friendly root disk."
+    condition     = var.root_volume_size_gb >= 8 && var.root_volume_size_gb <= 100
+    error_message = "Use between 8 and 100 GiB (many AL2023 AMIs need at least 30 GiB)."
   }
 }
 

@@ -89,7 +89,7 @@ resource "aws_instance" "this" {
 
   root_block_device {
     volume_size           = var.root_volume_size_gb
-    volume_type           = "gp2"
+    volume_type           = "gp3" # gp3 is valid on root_block_device (Terraform AWS provider); often cheaper GiB/IO than gp2 when not on Free Tier
     delete_on_termination = true
   }
 
